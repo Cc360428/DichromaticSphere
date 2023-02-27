@@ -1,0 +1,82 @@
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+func main() {
+	// 设置随机数种子
+	rand.Seed(time.Now().UnixNano())
+
+	// 生成6个不重复的红球号码
+	var redBalls []int
+	for len(redBalls) < 6 {
+		n := rand.Intn(33) + 1
+		if !contains(redBalls, n) {
+			redBalls = append(redBalls, n)
+		}
+	}
+
+	// 生成一个蓝球号码
+	blueBall := rand.Intn(16) + 1
+
+	// 输出生成的双色球号码
+	fmt.Printf("本期双色球号码为：%v + %d\n", redBalls, blueBall)
+
+	// 计算中奖概率
+	maxProb := 0.0
+	var maxNums []int
+	for i := 1; i <= 33; i++ {
+		if !contains(redBalls, i) {
+			nums := append(redBalls, i)
+			prob := calcProbability(nums, blueBall)
+			if prob > maxProb {
+				maxProb = prob
+				maxNums = nums
+			}
+		}
+	}
+
+	// 输出概率最大的中奖号码及其概率
+	fmt.Printf("概率最大的中奖号码为：%v + %d，中奖概率为：%f\n", maxNums, blueBall, maxProb)
+}
+
+// 判断一个整数是否在一个整数切片中
+func contains(nums []int, n int) bool {
+	for _, num := range nums {
+		if num == n {
+			return true
+		}
+	}
+	return false
+}
+
+// 计算给定双色球号码的中奖概率
+func calcProbability(nums []int, blueBall int) float64 {
+	var redMatches int
+	for _, num := range nums {
+		if contains(winRedBalls, num) {
+			redMatches++
+		}
+	}
+	blueMatch := blueBall == winBlueBall
+	return probMap[redMatches][blueMatch]
+}
+
+// 中奖号码
+var winRedBalls = []int{1, 2, 3, 4, 5, 6}
+
+var winBlueBall = 7
+
+// 中奖概率表
+var probMap = map[int]map[bool]float64{
+	0: {false: 1.0 / 33.0, true: 0.0},
+	1: {false: 1.0 / 32.0, true: 1.0 / 16.0},
+	2: {false: 1.0 / 31.0, true: 1.0 / 15.0},
+	3: {false: 1.0 / 30.0, true: 1.0 / 14.0},
+	4: {false: 1.0 / 29.0, true: 1.0 / 13.0},
+	5: {false: 1.0 / 28.0, true: 1.0 / 12.0},
+	6: {false: 0.0, true: 1.0 / 11.0},
+}

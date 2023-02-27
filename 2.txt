@@ -1,0 +1,93 @@
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+// 生成双色球号码
+func generateNumbers() (re struct {
+	redBalls, blueBall int
+}) {
+	rand.Seed(time.Now().UnixNano())
+	re.redBalls = rand.Intn(33) + 1
+	re.blueBall = rand.Intn(16) + 1
+	return
+}
+
+// 生成多组双色球号码
+func generateTicket(count int) [][]int {
+	tickets := make([][]int, count)
+	for i := 0; i < count; i++ {
+		ticket := make([]int, 7)
+		for j := 0; j < 6; j++ {
+			// 生成红球号码
+			for {
+				num := rand.Intn(33) + 1
+				if !contains(ticket[:j], num) {
+					ticket[j] = num
+					break
+				}
+			}
+		}
+		// 生成蓝球号码
+		for {
+			num := rand.Intn(16) + 1
+			if !contains(ticket[:6], num) {
+				ticket[6] = num
+				break
+			}
+		}
+		tickets[i] = ticket
+	}
+	return tickets
+}
+
+// 判断一个切片中是否包含某个元素
+func contains(slice []int, val int) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
+}
+
+// 计算一等奖的中奖概率最大的一组号码
+func calculateMaxProbability() []int {
+	maxProbability := 0.0
+	var maxTicket []int
+	for i := 0; i < 100; i++ {
+		ticket := generateTicket(1)[0]
+		if probability := calculateProbability(ticket); probability > maxProbability {
+			maxProbability = probability
+			maxTicket = ticket
+		}
+	}
+	fmt.Printf("概率最大的一组号码为：%v，中奖概率为：%f\n", maxTicket, maxProbability)
+	return maxTicket
+}
+
+// 计算一个号码中奖的概率
+func calculateProbability(ticket []int) float64 {
+	var probability float64 = 1.0
+	for i := 0; i < 6; i++ {
+		probability *= float64(33-i) / float64(33)
+	}
+	probability *= float64(16) / float64(33)
+	if contains(ticket[:6], generateNumbers().redBalls) && ticket[6] == generateNumbers().blueBall {
+		probability *= 1.0
+	} else if contains(ticket[:6], generateNumbers().redBalls) && ticket[6] != generateNumbers().blueBall {
+		probability *= 0.1666667
+	} else if !contains(ticket[:6], generateNumbers().redBalls) && ticket[6] == generateNumbers().blueBall {
+		probability *= 0.1666667
+	} else {
+		probability *= 0.0277778
+	}
+	return probability
+}
+
+func main() {
+	calculateMaxProbability()
+}

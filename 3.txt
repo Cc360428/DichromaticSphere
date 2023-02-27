@@ -1,0 +1,86 @@
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "sort"
+    "time"
+)
+
+func main() {
+    // 设置随机数种子
+    rand.Seed(time.Now().UnixNano())
+
+    // 模拟次数
+    times := 1000000
+
+    // 统计每个号码的出现次数
+    redMap := make(map[int]int)
+    blueMap := make(map[int]int)
+
+    // 进行模拟
+    for i := 0; i < times; i++ {
+        redBall := make([]int, 6)
+        blueBall := rand.Intn(16) + 1
+
+        // 生成6个不重复的红球号码
+        for j := 0; j < 6; j++ {
+            for {
+                num := rand.Intn(33) + 1
+                if !contains(redBall, num) {
+                    redBall[j] = num
+                    break
+                }
+            }
+        }
+
+        // 对红球号码排序
+        sort.Ints(redBall)
+
+        // 统计红球和蓝球的出现次数
+        for _, num := range redBall {
+            redMap[num]++
+        }
+        blueMap[blueBall]++
+    }
+
+    // 计算概率并找出一等奖概率最大的一组号码
+    maxProb := 0.0
+    var maxRedBall []int
+    var maxBlueBall int
+    for redBall, redCount := range redMap {
+        for blueBall, blueCount := range blueMap {
+            // 计算当前组合的一等奖概率
+            prob := float64(redCount) / float64(times) *
+                float64(redCount-1) / float64(times-1) *
+                float64(redCount-2) / float64(times-2) *
+                float64(redCount-3) / float64(times-3) *
+                float64(redCount-4) / float64(times-4) *
+                float64(redCount-5) / float64(times-5) *
+                float64(blueCount) / float64(times)
+
+            // 如果当前概率更大，则更新记录
+            if prob > maxProb {
+                maxProb = prob
+                maxRedBall = []int{redBall}
+                maxBlueBall = blueBall
+            } else if prob == maxProb {
+                // 如果当前概率与之前最大概率相等，则将当前组合加入记录中
+                maxRedBall = append(maxRedBall, redBall)
+            }
+        }
+    }
+
+    // 输出结果
+    fmt.Printf("一等奖概率最大的号码组合为：红球 %v，蓝球 %d，概率为 %.8f\n", maxRedBall, maxBlueBall, maxProb)
+}
+
+// 判断一个数是否在切片中
+func contains(nums []int, num int) bool {
+    for _, n := range nums {
+        if n == num {
+            return true
+        }
+    }
+    return false
+}

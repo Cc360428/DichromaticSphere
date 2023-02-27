@@ -1,0 +1,69 @@
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"sort"
+	"time"
+)
+
+const (
+	redMax    = 33 // 红球最大号码
+	blueMax   = 16 // 蓝球最大号码
+	redCount  = 6  // 红球数量
+	blueCount = 1  // 蓝球数量
+)
+
+type Ball struct {
+	redBalls []int
+	blueBall int
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano()) // 初始化随机种子
+
+	maxCount := 100000000           // 生成号码组合数量
+	ballMap := make(map[string]int) // 统计号码出现次数
+	var maxBall Ball                // 最大概率的号码组合
+
+	for i := 0; i < maxCount; i++ {
+		ball := generateBall()
+		key := fmt.Sprintf("%v,%v", ball.redBalls, ball.blueBall)
+		ballMap[key]++
+	}
+
+	var balls []Ball
+	for key, count := range ballMap {
+		ball := Ball{}
+		fmt.Sscanf(key, "[%d %d %d %d %d %d],%d", &ball.redBalls[0], &ball.redBalls[1], &ball.redBalls[2],
+			&ball.redBalls[3], &ball.redBalls[4], &ball.redBalls[5], &ball.blueBall)
+		ballMap[key] = count
+		balls = append(balls, ball)
+	}
+
+	// 对所有的号码组合按出现次数进行排序
+	sort.Slice(balls, func(i, j int) bool {
+		return ballMap[fmt.Sprintf("%v,%v", balls[i].redBalls, balls[i].blueBall)] > ballMap[fmt.Sprintf("%v,%v", balls[j].redBalls, balls[j].blueBall)]
+	})
+
+	for _, ball := range balls {
+		fmt.Printf("红球号码：%v, 蓝球号码：%v, 概率：%.6f\n", ball.redBalls, ball.blueBall, float64(ballMap[fmt.Sprintf("%v,%v", ball.redBalls, ball.blueBall)])/float64(maxCount))
+		maxBall = ball
+		break
+	}
+
+	fmt.Println("概率最大的号码组合：", maxBall)
+}
+
+// 随机生成一组号码
+func generateBall() Ball {
+	ball := Ball{}
+
+	redBalls := rand.Perm(redMax)[:redCount]
+	sort.Ints(redBalls)
+	ball.redBalls = redBalls
+
+	ball.blueBall = rand.Intn(blueMax) + 1
+
+	return ball
+}

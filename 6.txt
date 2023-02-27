@@ -1,0 +1,77 @@
+package main
+
+import (
+    "fmt"
+    "math/rand"
+    "sort"
+    "time"
+)
+
+const (
+    redBallMin = 1
+    redBallMax = 33
+    blueBallMin = 1
+    blueBallMax = 16
+    redBallCount = 6
+    blueBallCount = 1
+)
+
+func main() {
+    rand.Seed(time.Now().UnixNano())
+
+    var maxProb float64
+    var maxNumbers [6]int
+    var maxBlueNumber int
+
+    for {
+        redNumbers := generateRandomNumbers(redBallMin, redBallMax, redBallCount)
+        blueNumber := generateRandomNumber(blueBallMin, blueBallMax)
+
+        prob := calculateProbability(redNumbers, blueNumber)
+        if prob > maxProb {
+            maxProb = prob
+            copy(maxNumbers[:], redNumbers)
+            maxBlueNumber = blueNumber
+            sort.Ints(maxNumbers[:])
+        }
+
+        if prob == 1.0 {
+            fmt.Printf("一等奖概率最大的号码为: %v + %v\n", maxNumbers, maxBlueNumber)
+            break
+        }
+    }
+}
+
+func generateRandomNumbers(min, max, count int) [6]int {
+    numbers := [6]int{}
+
+    for i := 0; i < count; i++ {
+        numbers[i] = generateRandomNumber(min, max)
+    }
+
+    return numbers
+}
+
+func generateRandomNumber(min, max int) int {
+    return rand.Intn(max-min+1) + min
+}
+
+func calculateProbability(redNumbers [6]int, blueNumber int) float64 {
+    redBallProb := calculateRedBallProbability(redNumbers)
+    blueBallProb := calculateBlueBallProbability(blueNumber)
+    return redBallProb * blueBallProb
+}
+
+func calculateRedBallProbability(redNumbers [6]int) float64 {
+    n := float64(1)
+
+    for _, num := range redNumbers {
+        n *= float64(redBallMax - num + 1) / float64(redBallMax - redBallMin + 1)
+    }
+
+    return n
+}
+
+func calculateBlueBallProbability(blueNumber int) float64 {
+    return 1.0 / float64(blueBallMax - blueBallMin + 1)
+}
