@@ -1,107 +1,42 @@
 package main
 
 import (
-	"fmt"
+	"github.com/Cc360428/DichromaticSphere/ball"
+	"github.com/Cc360428/DichromaticSphere/utils"
 	"math/rand"
 	"time"
 )
 
 func main() {
-	// 初始化随机数生成器
-	rand.Seed(time.Now().UnixNano())
-
-	// 生成6个不重复的红色球
-	var redBalls []int
-	for len(redBalls) < 6 {
-		num := rand.Intn(33) + 1
-		if !contains(redBalls, num) {
-			redBalls = append(redBalls, num)
-		}
+	rand.Seed(time.Now().UnixNano()) // 初始化随机种子
+	ballMap := make(map[string]int64)
+	for i := 0; i < ball.MaxCount; i++ {
+		ballMap[ball.GenerateBall()]++
 	}
-
-	// 生成1个蓝色球
-	blueBall := rand.Intn(16) + 1
-
-	// 打印结果
-	fmt.Printf("红球：%v，蓝球：%d\n", redBalls, blueBall)
-
-	// 计算概率最大的中奖号码
-	maxProbability(redBalls, blueBall)
+	utils.SortMapByValue(ballMap)
 }
 
-// 判断一个int类型的切片中是否包含某个元素
-func contains(slice []int, item int) bool {
-	for _, val := range slice {
-		if val == item {
-			return true
-		}
-	}
-	return false
-}
+/**
+1000000000
 
-// 计算概率最大的中奖号码
-func maxProbability(redBalls []int, blueBall int) {
-	var maxRedBalls []int
-	var maxBlueBall int
-	var maxProbability float64
+number: 104  value:  01  03  06  08  21  32 10
+number: 101  value:  03  06  07  08  12  29 04
+number: 97   value:  10  15  16  19  24  28 06
+number: 97   value:  01  06  10  18  27  33 02
+number: 97   value:  18  19  26  29  30  33 03
 
-	// 遍历所有可能的红球和蓝球组合，计算中奖概率
-	for i := 1; i <= 33; i++ {
-		for j := i + 1; j <= 33; j++ {
-			for k := j + 1; k <= 33; k++ {
-				for l := k + 1; l <= 33; l++ {
-					for m := l + 1; m <= 33; m++ {
-						for n := m + 1; n <= 33; n++ {
-							for b := 1; b <= 16; b++ {
-								r := []int{i, j, k, l, m, n}
-								p := probability(r, b, redBalls, blueBall)
-								if p > maxProbability {
-									maxRedBalls = r
-									maxBlueBall = b
-									maxProbability = p
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+177210880
 
-	// 打印结果
-	fmt.Printf("概率最大的中奖号码：%v，蓝球：%d，概率：%f\n", maxRedBalls, maxBlueBall, maxProbability)
-}
+number: 36  value:  05  15  18  26  28  30 05
+number: 30  value:  01  04  08  26  30  32 03
+number: 29  value:  08  09  16  21  22  29 07
+number: 29  value:  03  11  12  14  27  33 01
+number: 29  value:  07  10  20  25  26  27 04
 
-// 计算某个红球和蓝球组合的中奖概率
-func probability(redBalls []int, blueBall int, winRedBalls []int, winBlueBall int) float64 {
-	redMatches := 0
-	for _, val := range redBalls {
-		if contains(winRedBalls, val) {
-			redMatches++
-		}
-	}
-	blueMatch := blueBall == winBlueBall
-	if redMatches == 0 && blueMatch {
-		return 1.0 / 17721088.0
-	} else if redMatches == 6 && !blueMatch {
-		return 1.0 / 296017.0
-	} else if redMatches == 6 && blueMatch {
-		return 1.0 / 177210880.0
-	} else if redMatches == 5 && blueMatch {
-		return 1.0 / 35508216.0
-	} else if redMatches == 5 && !blueMatch {
-		return 1.0 / 591803.6
-	} else if redMatches == 4 && blueMatch {
-		return 1.0 / 36252.0
-	} else if redMatches == 4 && !blueMatch {
-		return 1.0 / 723.0
-	} else if redMatches == 3 && blueMatch {
-		return 1.0 / 1726.0
-	} else if redMatches == 2 && blueMatch {
-		return 1.0 / 96.0
-	} else if redMatches == 1 && blueMatch {
-		return 1.0 / 48.0
-	} else {
-		return 0.0
-	}
-}
+number: 30  value:  08  11  18  20  22  24 10
+number: 30  value:  01  07  08  10  22  33 03
+number: 29  value:  04  13  17  20  28  29 16
+number: 29  value:  01  02  15  20  28  31 10
+number: 29  value:  01  12  13  24  28  31 04
+
+*/
